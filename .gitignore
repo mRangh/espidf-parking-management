@@ -1,0 +1,23 @@
+# Python
+python/__pycache__/
+__pycache__/
+*.pyc
+
+# Banco de dados do teste
+*.db
+*.db-journal
+parking.db
+
+# PlatformIO e builds do ESP32
+.pio/
+.pioenvs/
+.piolibdeps/
+.clang_complete
+build/
+sdkconfig
+
+# VS Code (mantendo apenas o settings e extensions que você já adicionou)
+.vscode/c_cpp_properties.json
+.vscode/launch.json
+.vscode/ipch/
+.vscode/.browse.c_cpp.db*
