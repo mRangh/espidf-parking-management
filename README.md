@@ -151,7 +151,11 @@ idf.py -p /dev/ttyUSB0 flash monitor
 
 ## Known Limitations
 
-- QR display in `generate_qr_code` uses `cv2.waitKey(0)` and blocks until the window is closed manually.
 - EasyOCR initializes at module import time, adding startup latency even when OCR is not needed.
 - `SECURITY_BREACH` state has no automatic recovery; manual hardware reset is required.
-- The database has no automated cleanup for stale entries.
+
+## Observation
+
+- QR display in generate_qr_code uses cv2.waitKey(0) and blocks until the window is closed manually.
+      - It's good to Workbench testing
+      - To real applications, seting cv2.waitKey(1) is needed
