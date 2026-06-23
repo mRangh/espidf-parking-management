@@ -1,0 +1,3 @@
+[submodule "lib/esp32_hal_cpp"]
+	path = lib/esp32_hal_cpp
+	url = https://github.com/mRangh/esp32-hal-cpp
