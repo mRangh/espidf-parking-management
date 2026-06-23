@@ -47,7 +47,7 @@ An embedded + computer vision system for automated parking lot access control. A
 ```
 ├── main.cpp                # ESP32 entry point and hardware instantiation
 ├── gate_ctrl.hpp           # Gate state machine class
-├── hardware_drivers.hpp    # ESP32 peripheral drivers (GPIO, servo, ADC, ultrasonic)
+├── lib/esp32_hal           # ESP32 peripheral drivers (GPIO, servo, ADC, ultrasonic)
 ├── uart_handler.hpp        # UART communication task (ESP32 side)
 ├── gate_client.py          # Serial communication client and event loop (Python side)
 ├── callbacks.py            # Entry and exit processing logic
@@ -156,6 +156,8 @@ idf.py -p /dev/ttyUSB0 flash monitor
 
 ## Observation
 
-- QR display in generate_qr_code uses cv2.waitKey(0) and blocks until the window is closed manually.
-      - It's good to Workbench testing
-      - To real applications, seting cv2.waitKey(1) is needed
+# QR display in generate_qr_code uses cv2.waitKey(0) and blocks until the window is closed manually.
+- It's good to Workbench testing
+- To real applications, seting cv2.waitKey(1) is needed
+
+# TIME_OUT is to long for real application

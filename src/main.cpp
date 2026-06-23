@@ -1,7 +1,23 @@
+/*
+ * ============================================================================
+ * @file        main.cpp
+ *
+ * @author      Marco Antônio Ranghetti
+ * @github      github.com/mRangh
+ * @email       marcoantonioranghetti@gmail.com
+ * @academic    d2026008956@unifei.edu.br
+ *
+ * @version     1.0.0
+ * @date        2026-06-22
+ * @license     Apache License 2.0
+ * ============================================================================
+ */
+
+
 #include <cstdio>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "hardware_drivers.hpp"
+#include <esp32_hal.hpp>
 #include "gate_ctrl.hpp"
 #include "uart_handler.hpp"
 
@@ -13,15 +29,15 @@ Switch loop_sensor{12};
 Switch paper_sensor{16};
 Switch limit_90_sensor{27};
 Switch limit_0_sensor{14};
-Output led_r{25};
-Output led_g{26};
-Ultrassonic pass_sensor{13, 34};
+Output led_r{18};
+Output led_g{21};
+Ultrasonic pass_sensor{13, 34};
 
 // =============================================================================
 // GATE CONFIGURATION
 // =============================================================================
 Gate gate({
-    .mode     = Gate::ENTRY_PRINTING,
+    .mode     = Gate::EXIT_VALIDATING,
     .servo    = servo,
     .degree90 = limit_90_sensor,
     .degree0  = limit_0_sensor,

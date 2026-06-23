@@ -1,3 +1,18 @@
+/*
+ * ============================================================================
+ * @file        uart_handler.hpp
+ *
+ * @author      Marco Antônio Ranghetti
+ * @github      github.com/mRangh
+ * @email       marcoantonioranghetti@gmail.com
+ * @academic    d2026008956@unifei.edu.br
+ *
+ * @version     1.0.0
+ * @date        2026-06-22
+ * @license     Apache License 2.0
+ * ============================================================================
+ */
+
 #ifndef UART_HANDLER_HPP
 #define UART_HANDLER_HPP
 
@@ -48,14 +63,17 @@ static void uart_rx_task(void *pvParameters){
 }
 
 inline void init_uart_communication(Gate& gate_to_control, int core_id) {
-    uart_config_t uart_config = {
-        .baud_rate = 115200,
-        .data_bits = UART_DATA_8_BITS,
-        .parity    = UART_PARITY_DISABLE,
-        .stop_bits = UART_STOP_BITS_1,
-        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
-        .source_clk = UART_SCLK_DEFAULT,
-    };
+    // 1. Cria a struct zerando absolutamente todos os campos internos automaticamente
+    uart_config_t uart_config = {}; 
+    
+    // 2. Preenche apenas o que você precisa, sem se preocupar com ordem ou flags ocultas
+    uart_config.baud_rate           = 115200;
+    uart_config.data_bits           = UART_DATA_8_BITS;
+    uart_config.parity              = UART_PARITY_DISABLE;
+    uart_config.stop_bits           = UART_STOP_BITS_1;
+    uart_config.flow_ctrl           = UART_HW_FLOWCTRL_DISABLE;
+    uart_config.rx_flow_ctrl_thresh = 0;
+    uart_config.source_clk          = UART_SCLK_DEFAULT;
     
     ESP_ERROR_CHECK(uart_param_config(UART_COMM_NUM, &uart_config));
     ESP_ERROR_CHECK(uart_driver_install(UART_COMM_NUM, UART_BUF_SIZE * 2, 0, 0, NULL, 0));

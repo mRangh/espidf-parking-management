@@ -1,3 +1,18 @@
+'''
+ * ============================================================================
+ * @file        gate_client.py
+ *
+ * @author      Marco Antônio Ranghetti
+ * @github      github.com/mRangh
+ * @email       marcoantonioranghetti@gmail.com
+ * @academic    d2026008956@unifei.edu.br
+ *
+ * @version     1.0.0
+ * @date        2026-06-22
+ * @license     Apache License 2.0
+ * ============================================================================
+ '''
+
 import serial, sys, time
 from typing import Callable
 import callbacks
@@ -8,7 +23,7 @@ class GateClient:
 
     esp32: serial.Serial | None = None
 
-    def __init__(self, port='/dev/ttyUSB0', baudrate=115200): # Standard port = '/dev/ttyUSB0'
+    def __init__(self, port='/dev/ttyUSB0', baudrate=115200):
         self.port = port
         self.baudrate = baudrate
         self.esp32 = None
@@ -69,6 +84,7 @@ class GateClient:
                     line_bytes = self.esp32.readline()
                     if line_bytes:
                         line = line_bytes.decode('utf-8', errors='ignore').strip()
+                        print(line)
                         if "Requesting processment..." in line:
                             self.activation_string = line
                             print(f'[PYTHON]: Listened {self.activation_string}. Starting processment.')

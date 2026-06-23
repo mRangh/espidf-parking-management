@@ -1,3 +1,18 @@
+'''
+ * ============================================================================
+ * @file        data_base.py
+ *
+ * @author      Marco Antônio Ranghetti
+ * @github      github.com/mRangh
+ * @email       marcoantonioranghetti@gmail.com
+ * @academic    d2026008956@unifei.edu.br
+ *
+ * @version     1.0.0
+ * @date        2026-06-22
+ * @license     Apache License 2.0
+ * ============================================================================
+ '''
+
 import os
 os.environ["QT_QPA_PLATFORM"] = "xcb"
 os.environ["QT_LOGGING_RULES"] = "*.warning=false"

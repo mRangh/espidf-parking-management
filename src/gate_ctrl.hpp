@@ -1,8 +1,23 @@
+/*
+ * ============================================================================
+ * @file        gate_ctrl.hpp
+ *
+ * @author      Marco Antônio Ranghetti
+ * @github      github.com/mRangh
+ * @email       marcoantonioranghetti@gmail.com
+ * @academic    d2026008956@unifei.edu.br
+ *
+ * @version     1.0.0
+ * @date        2026-06-22
+ * @license     Apache License 2.0
+ * ============================================================================
+ */
+
 #ifndef GATE_CTRL_HPP
 #define GATE_CTRL_HPP
 #ifdef __cplusplus
 #include <atomic>
-#include "hardware_drivers.hpp"
+#include <esp32_hal.hpp>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
@@ -36,7 +51,7 @@ class Gate {
             DigitalInput& degree90;
             DigitalInput& degree0;
             DigitalInput& loop;
-            Ultrassonic& pass;
+            Ultrasonic& pass;
             DigitalInput& paper;
             Output& led_r;
             Output& led_g;
@@ -97,7 +112,7 @@ class Gate {
 
         Servo& servo;
         DigitalInput& loop_sensor;
-        Ultrassonic& pass_sensor;
+        Ultrasonic& pass_sensor;
         DigitalInput& paper_sensor;
         DigitalInput& degree0;
         DigitalInput& degree90;
@@ -127,11 +142,9 @@ class Gate {
             }
         }
 
-        // Execute the gate state machine once per loop.
         void run_machine() {
             switch (current_state) {
                 case LOCKED:
-                    // Gate is fully closed and waiting for a vehicle.
                     process_done = false;
                     vTaskDelay(pdMS_TO_TICKS(100));
                     if (loop_sensor.read() == 1) {
@@ -147,7 +160,7 @@ class Gate {
                             printf("[EXIT_GATE]: Vehicle detected. Awaiting QR code validation...\n");
                         }
                     }
-                    if (pass_sensor.read_cm() <= 200) {
+                    if (pass_sensor.read_cm() <= 10) {
                         current_state = SECURITY_BREACH;
                         printf("[DEBUG]: current_state = SECURITY_BREACH\n");
                         printf("[SECURITY_BREACH]: Violated Gate!\n");
@@ -155,7 +168,6 @@ class Gate {
                     break;
 
                 case PROCESSING:
-                    // Blink red LED while processing entry/exit actions.
                     red_led.write((esp_timer_get_time() / 500000) % 2);
                     
                     if (process_done) {
@@ -163,7 +175,7 @@ class Gate {
                             switch(printing_state){
                                 case WAIT_PRINT:
                                     if (paper_sensor.read() == 0) {
-                                        if ((esp_timer_get_time() / 1000) - state_timer > 10000) {
+                                        if ((esp_timer_get_time() / 1000) - state_timer > 120000) {
                                             printf("[GATE_ERR]: Out of paper or paper stuck\n");
                                             state_timer = esp_timer_get_time() / 1000;
                                             current_state = TIMEOUT_ERR;
@@ -186,7 +198,7 @@ class Gate {
                                         printing_state = WAIT_PRINT;
                                         printf("[DEBUG]: current_state = OPENING\n");
                                     }
-                                    if ((esp_timer_get_time() / 1000) - state_timer > 10000 && loop_sensor.read() == 0 && paper_sensor.read() == 1) {
+                                    if ((esp_timer_get_time() / 1000) - state_timer > 120000 && loop_sensor.read() == 0 && paper_sensor.read() == 1) {
                                         printf("[GATE_WARN]: No vehicle detected to remove ticket. Closing gate\n");
                                         state_timer = esp_timer_get_time() / 1000;
                                         current_state = CLOSING;
@@ -203,7 +215,7 @@ class Gate {
                         }
                     }
 
-                    if (!process_done && ((esp_timer_get_time() / 1000) - state_timer > 60000)) {
+                    if (!process_done && ((esp_timer_get_time() / 1000) - state_timer > 120000)) {
                         current_state = TIMEOUT_ERR;
                         printf("[GATE_ERR]: Timeout waiting for processment to complete.\n");
                         printf("[DEBUG]: current_state = TIMEOUT_ERR\n");
@@ -211,7 +223,6 @@ class Gate {
                     break;
 
                 case OPENING:
-                    // Move servo to open position and show green status.
                     red_led.write(false);
                     green_led.write(true);
                     servo.move(90);
@@ -224,7 +235,7 @@ class Gate {
                         printf("[DEBUG]: current_state = OPENED\n");
                         printf("[DEBUG]: Starting OPENED_MACHINE_STATES loop\n");
                         printf("[GATE]: Gate open. End stop reached.\n");
-                    } else if ((esp_timer_get_time() / 1000) - state_timer > 10000) {
+                    } else if ((esp_timer_get_time() / 1000) - state_timer > 120000) {
                         current_state = TIMEOUT_ERR;
                         printf("[GATE_ERR]: Mechanical lock or 90° sensor failure.\n");
                     }
@@ -237,7 +248,6 @@ class Gate {
                     break;
 
                 case OPENED: {
-                    // Wait for the vehicle to clear the loop before closing.
                     switch(opened_state){
                         case ON_LOOP:
                             if (loop_sensor.read() == 0) {
@@ -259,7 +269,7 @@ class Gate {
                                     printf("[GATE_WARN]: Vehicle detected\n");
                                     printf("[DEBUG]: opened_state = ON_PASS\n");
                                 }
-                                if ((esp_timer_get_time() / 1000) - state_timer > 20000) {
+                                if ((esp_timer_get_time() / 1000) - state_timer > 120000) {
                                     printf("[GATE_WARN]: Closing for time out\n");
                                     state_timer = esp_timer_get_time() / 1000;
                                     current_state = CLOSING;
@@ -279,7 +289,6 @@ class Gate {
                 }
 
                 case CLOSING:
-                    // Return servo to closed position and show red status.
                     green_led.write(false);
                     red_led.write(true);
                     servo.move(0);
@@ -288,7 +297,7 @@ class Gate {
                         current_state = LOCKED;
                         printf("[GATE]: Gate closed. End stop reached.\n");
                         printf("[DEBUG]: current_state = LOCKED\n");
-                    } else if ((esp_timer_get_time() / 1000) - state_timer > 10000) {
+                    } else if ((esp_timer_get_time() / 1000) - state_timer > 120000) {
                         current_state = TIMEOUT_ERR;
                         printf("[DEBUG]: current_state = TIMEOUT_ERR\n");
                         printf("[GATE_ERR]: Mechanical lock or 0° sensor failure.\n");
@@ -302,7 +311,6 @@ class Gate {
                     break;
 
                 case TIMEOUT_ERR:
-                    // Error state: flash both LEDs until the loop clears.
                     red_led.write((esp_timer_get_time() / 200000) % 2);
                     green_led.write((esp_timer_get_time() / 200000) % 2);
 
